@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Student Dashboard — Custom Cards</title>
+<style>
+  :root{
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --muted: #6b7280;
+    --accent: #4f46e5;
+    --accent-600: #4338ca;
+    --glass: rgba(255,255,255,0.6);
+    --radius: 12px;
+    --shadow: 0 6px 18px rgba(16,24,40,0.06);
+    --gap: 18px;
+    --max-width: 1200px;
+  }
+
+  /* Base */
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:var(--bg);
+    color:#111827;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.35;
+  }
+  a{color:var(--accent); text-decoration:none}
+  .container{
+    max-width:var(--max-width);
+    margin:20px auto;
+    padding:18px;
+  }
+
+  /* Topbar (simple) */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .logo{
+    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-600));
+    display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:var(--shadow)
+  }
+  .search{flex:1;max-width:540px}
+  .top-actions{display:flex;gap:10px;align-items:center}
+
+  /* Dashboard grid */
+  .dashboard-grid{
+    display:grid;
+    grid-template-columns: 1fr 360px; /* main + sidebar column */
+    gap:var(--gap);
+    align-items:start;
+  }
+
+  /* Responsive */
+  @media (max-width:920px){
+    .dashboard-grid{grid-template-columns: 1fr}
+  }
+
+  /* Reusable Card */
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-height:80px;
+  }
+  .card-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .card-title{font-weight:600;font-size:15px}
+  .card-sub{color:var(--muted);font-size:13px}
+  .card-body{display:flex;flex-direction:column;gap:8px}
+  .card-footer{display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+  .muted{color:var(--muted);font-size:13px}
+  .btn{
+    border:0;padding:8px 12px;border-radius:8px;background:var(--glass);cursor:pointer;font-weight:600
+  }
+  .btn-primary{
+    background:linear-gradient(90deg,var(--accent),var(--accent-600));
+    color:white;border-radius:10px;padding:8px 12px;cursor:pointer;border:0;
+  }
+
+  /* Welcome block spans full width */
+  .card--full{grid-column:1 / -1}
+
+  /* Small helpers */
+  .small-list{display:flex;flex-direction:column;gap:6px}
+  .small-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:rgba(0,0,0,0.02)}
+  .badge{background:rgba(79,70,229,0.08);color:var(--accent);padding:6px 8px;border-radius:999px;font-weight:600;font-size:12px}
+
+  /* GPA card */
+  .gpa-value{font-size:28px;font-weight:700}
+  .gpa-trend{width:120px;height:34px}
+
+  /* Modal (Today's Schedule) */
+  .modal{
+    position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    background:rgba(2,6,23,0.45);z-index:9999;padding:20px;
+  }
+  .modal[aria-hidden="false"]{display:flex;animation:fadeIn .14s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal-dialog{
+    background:var(--card);border-radius:12px;padding:18px;width:100%;max-width:680px;box-shadow:0 20px 50px rgba(2,6,23,0.25)
+  }
+  .modal-close{
+    border:0;background:transparent;font-size:22px;cursor:pointer;color:var(--muted)
+  }
+
+  /* small utilities */
+  .muted-2{color:#9ca3af;font-size:13px}
+  .pill{padding:6px 10px;border-radius:999px;background:rgba(99,102,241,0.08);font-weight:600;color:var(--accent)}
+  .link-small{font-size:13px;color:var(--accent);cursor:pointer}
+
+  /* Footer area for cards to support nav links */
+  .card-footer a{font-size:13px;color:var(--accent)}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">SD</div>
+        <div>
+          <div style="font-weight:700">Versity Portal</div>
+          <div class="muted">Student Dashboard</div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <input class="search" placeholder="Search courses, announcements..." aria-label="Search" />
+        <button class="btn">🔔</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <img src="https://api.dicebear.com/6.x/identicon/svg?seed=Tusher" alt="avatar" width="36" height="36" style="border-radius:50%" />
+          <div style="text-align:left">
+            <div style="font-weight:700;font-size:14px">Tusher Debnath</div>
+            <div class="muted">Computer Science</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <main class="dashboard-grid" role="main" aria-label="Student dashboard">
+
+      <!-- Welcome (full width) -->
+      <section class="card card--full" aria-labelledby="welcomeTitle">
+        <div class="card-header">
+          <div>
+            <div id="welcomeTitle" class="card-title">Welcome back, Tusher 👋</div>
+            <div class="card-sub">Here's a quick overview of your day</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <a href="/profile" class="link-small">View Profile</a>
+            <a href="/settings" class="link-small">Settings</a>
+          </div>
+        </div>
+        <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <div class="muted-2">Student ID: <strong>2025-12345</strong></div>
+          <div class="muted-2">Department: <strong>Computer Science</strong></div>
+          <div style="margin-left:auto" class="pill">Semester 5</div>
+        </div>
+      </section>
+
+      <!-- Left column: today's schedule -->
+      <section class="card" aria-labelledby="scheduleLabel">
+        <div class="card-header">
+          <div>
+            <div id="scheduleLabel" class="card-title">Today's Schedule</div>
+            <div class="card-sub">Quick view — click to expand</div>
+          </div>
+          <div class="badge">3 events</div>
+        </div>
+
+        <!-- partial preview (only 2 items) -->
+        <div class="card-body">
+          <div class="small-list" id="schedulePreview">
+            <!-- preview items filled by JS -->
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button id="openSchedule" class="btn-primary">View Full</button>
+          <a href="/schedule">See calendar</a>
+        </div>
+      </section>
+
+      <!-- Right column: GPA -->
+      <aside>
+        <div class="card gpa-card" aria-labelledby="gpaLabel">
+          <div class="card-header">
+            <div>
+              <div id="gpaLabel" class="card-title">Current GPA</div>
+              <div class="card-sub">Cumulative</div>
+            </div>
+            <div class="muted">CGPA</div>
+          </div>
+          <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div>
+              <div class="gpa-value" id="gpaValue">3.72</div>
+              <div class="muted-2">Last updated: Sep 23, 2025</div>
+            </div>
+            <!-- small sparkline -->
+            <svg class="gpa-trend" id="gpaSparkline" viewBox="0 0 120 34" aria-hidden="true" focusable="false"></svg>
+          </div>
+          <div class="card-footer">
+            <a href="/academic/performance">View full academic report</a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Course content (main column) -->
+      <section class="card" aria-labelledby="contentLabel">
+        <div class="card-header">
+          <div>
+            <div id="contentLabel" class="card-title">Course Content</div>
+            <div class="card-sub">Recently accessed materials</div>
+          </div>
+          <div class="muted">3 items</div>
+        </div>
+
+        <div class="card-body" id="contentPreview">
+          <!-- JS will render partial items -->
+        </div>
+
+        <div class="card-footer">
+          <a href="/courses/content">View all course content</a>
+        </div>
+      </section>
+
+      <!-- Obtained Grades (main column) -->
+      <section class="card" aria-labelledby="gradesLabel">
+        <div class="card-header">
+          <div>
+            <div id="gradesLabel" class="card-title">Obtained Grades</div>
+            <div class="card-sub">Latest results</div>
+          </div>
+          <div class="muted">Semester 4</div>
+        </div>
+
+        <div class="card-body" id="gradesPreview">
+          <!-- JS renders a few results -->
+        </div>
+
+        <div class="card-footer">
+          <a href="/grades">View transcript</a>
+        </div>
+      </section>
+
+      <!-- Upcoming Events -->
+      <section class="card" aria-labelledby="eventsLabel">
+        <div class="card-header">
+          <div>
+            <div id="eventsLabel" class="card-title">Upcoming Events</div>
+            <div class="card-sub">Important deadlines & events</div>
+          </div>
+          <div class="muted">2 upcoming</div>
+        </div>
+
+        <div class="card-body" id="eventsPreview"></div>
+
+        <div class="card-footer">
+          <a href="/events">See all events</a>
+        </div>
+      </section>
+
+      <!-- Recent Highlights -->
+      <section class="card" aria-labelledby="highlightsLabel">
+        <div class="card-header">
+          <div>
+            <div id="highlightsLabel" class="card-title">Recent Highlights</div>
+            <div class="card-sub">Announcements and highlights</div>
+          </div>
+          <div class="muted">4</div>
+        </div>
+
+        <div class="card-body" id="highlightsPreview"></div>
+
+        <div class="card-footer">
+          <a href="/announcements">More announcements</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal: Today's Schedule -->
+  <div class="modal" id="scheduleModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-dialog" role="document">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 id="modalTitle" style="margin:0">Full Schedule — Sep 23, 2025</h2>
+        <button id="modalClose" class="modal-close" aria-label="Close schedule dialog">✕</button>
+      </div>
+      <p class="muted" style="margin-top:6px">All events for today. Click outside or press Esc to close.</p>
+      <div id="modalScheduleList" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <a href="/schedule" class="btn">Open calendar</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* -------------------------
+   SAMPLE DATA (replace with fetch to your API)
+   ------------------------- */
+const sample = {
+  schedule: [
+    {time:"09:00 AM", course:"Mathematics II", instructor:"Dr. Rahman", room:"B-201"},
+    {time:"11:00 AM", course:"Physics Lab", instructor:"Ms. Sultana", room:"Lab-3"},
+    {time:"02:00 PM", course:"Algorithms", instructor:"Prof. Hasan", room:"C-104"}
+  ],
+  gpa: {value:3.72, trend:[3.2,3.4,3.65,3.7,3.72]},
+  contents: [
+    {title:"Algorithms - Lecture 8 (Graphs).pdf", meta:"Uploaded 2 days ago"},
+    {title:"Database - Normalization Slides.pptx", meta:"Viewed today"},
+    {title:"Operating Systems - Lab 3.zip", meta:"Uploaded 4 days ago"}
+  ],
+  grades: [
+    {course:"Mathematics II", grade:"A"},
+    {course:"Physics Lab", grade:"B+"},
+    {course:"Algorithms", grade:"A-"}
+  ],
+  events:[
+    {date:"Oct 02", title:"Midterm Exam - Algorithms"},
+    {date:"Oct 05", title:"Department Seminar: AI Trends"}
+  ],
+  highlights:[
+    {title:"Sports fest registration open"},
+    {title:"Library timings updated"},
+    {title:"Scholarship application deadline Oct 1"}
+  ]
+};
+
+/* -------------------------
+   RENDER PREVIEWS
+   ------------------------- */
+function renderSchedulePreview(){
+  const container = document.getElementById('schedulePreview');
+  container.innerHTML = '';
+  const preview = sample.schedule.slice(0,2);
+  preview.forEach(ev=>{
+    const item = document.createElement('div');
+    item.className = 'small-item';
+    item.innerHTML = `<div>
+                        <div style="font-weight:600">${ev.course}</div>
+                        <div class="muted-2" style="font-size:13px">${ev.instructor} • ${ev.room}</div>
+                      </div>
+                      <div class="muted">${ev.time}</div>`;
+    container.appendChild(item);
+  });
+}
+
+function renderModalSchedule(){
+  const list = document.getElementById('modalScheduleList');
+  list.innerHTML = '';
+  sample.schedule.forEach(ev=>{
+    const row = document.createElement('div');
+    row.className = 'small-item';
+    row.style.background='transparent';
+    row.style.borderLeft='3px solid rgba(79,70,229,0.12)';
+    row.innerHTML = `<div>
+                       <div style="font-weight:700">${ev.course}</div>
+                       <div class="muted-2">${ev.instructor} • ${ev.room}</div>
+                     </div>
+                     <div style="text-align:right">
+                       <div style="font-weight:700">${ev.time}</div>
+                     </div>`;
+    list.appendChild(row);
+  });
+}
+
+function renderContents(){
+  const c = document.getElementById('contentPreview');
+  c.innerHTML='';
+  sample.contents.forEach(it=>{
+    const el = document.createElement('div');
+    el.className='small-item';
+    el.innerHTML = `<div style="display:flex;flex-direction:column">
+                      <div style="font-weight:600">${it.title}</div>
+                      <div class="muted-2">${it.meta}</div>
+                    </div>`;
+    c.appendChild(el);
+  });
+}
+
+function renderGrades(){
+  const g = document.getElementById('gradesPreview');
+  g.innerHTML='';
+  sample.grades.forEach(gr=>{
+    const el = document.createElement('div');
+    el.className='small-item';
+    el.innerHTML = `<div style="font-weight:600">${gr.course}</div><div class="pill">${gr.grade}</div>`;
+    g.appendChild(el);
+  });
+}
+
+function renderEvents(){
+  const e = document.getElementById('eventsPreview');
+  e.innerHTML='';
+  sample.events.forEach(ev=>{
+    const el = document.createElement('div');
+    el.className='small-item';
+    el.innerHTML = `<div><div style="font-weight:700">${ev.title}</div><div class="muted-2">${ev.date}</div></div>`;
+    e.appendChild(el);
+  });
+}
+
+function renderHighlights(){
+  const h = document.getElementById('highlightsPreview');
+  h.innerHTML='';
+  sample.highlights.forEach(item=>{
+    const el = document.createElement('div');
+    el.className='small-item';
+    el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+                      <div>${item.title}</div>
+                      <div class="muted" style="font-size:12px">New</div>
+                    </div>`;
+    h.appendChild(el);
+  });
+}
+
+/* -------------------------
+   GPA sparkline (simple SVG)
+   ------------------------- */
+function drawSparkline(id, data){
+  const svg = document.getElementById(id);
+  const w = svg.viewBox.baseVal.width || svg.clientWidth || 120;
+  const h = svg.viewBox.baseVal.height || svg.clientHeight || 34;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const padX = 6, padY = 6;
+  const points = data.map((v,i)=>{
+    const x = padX + (i/(data.length-1))*(w - padX*2);
+    const y = padY + (1 - (v-min)/(max-min || 1))*(h - padY*2);
+    return `${x},${y}`;
+  }).join(' ');
+  svg.innerHTML = `
+    <polyline points="${points}" fill="none" stroke="rgba(79,70,229,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+  `;
+}
+
+/* -------------------------
+   Modal controls + accessibility
+   ------------------------- */
+const modal = document.getElementById('scheduleModal');
+const btnOpen = document.getElementById('openSchedule');
+const btnClose = document.getElementById('modalClose');
+let lastFocusedElement = null;
+
+btnOpen.addEventListener('click', openScheduleModal);
+btnClose.addEventListener('click', closeScheduleModal);
+modal.addEventListener('click', (e) => {
+  if(e.target === modal) closeScheduleModal();
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false'){
+    closeScheduleModal();
+  }
+});
+
+/* Basic focus trap inside modal (small and sufficient for this modal) */
+function trapFocus(modalEl){
+  const focusable = modalEl.querySelectorAll('a,button,input,textarea,[tabindex]:not([tabindex="-1"])');
+  if(!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length-1];
+  function handleTab(e){
+    if(e.key !== 'Tab') return;
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+  modalEl._trap = handleTab;
+  document.addEventListener('keydown', handleTab);
+}
+function releaseTrap(modalEl){
+  if(modalEl._trap) document.removeEventListener('keydown', modalEl._trap);
+  modalEl._trap = null;
+}
+
+function openScheduleModal(){
+  lastFocusedElement = document.activeElement;
+  renderModalSchedule(); // ensure content is up-to-date
+  modal.setAttribute('aria-hidden', 'false');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  // focus first focusable
+  setTimeout(()=> {
+    const close = modal.querySelector('.modal-close');
+    if(close) close.focus();
+    trapFocus(modal);
+  }, 50);
+}
+
+function closeScheduleModal(){
+  modal.setAttribute('aria-hidden', 'true');
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
+  releaseTrap(modal);
+  if(lastFocusedElement) lastFocusedElement.focus();
+}
+
+/* -------------------------
+   Bootstrapping UI
+   ------------------------- */
+function init(){
+  renderSchedulePreview();
+  renderContents();
+  renderGrades();
+  renderEvents();
+  renderHighlights();
+  drawSparkline('gpaSparkline', sample.gpa.trend);
+  document.getElementById('gpaValue').textContent = sample.gpa.value.toFixed(2);
+}
+
+init();
+
+/* -------------------------
+   Integration hints:
+   - Replace `sample` object by fetching data:
+       fetch('/api/student/dashboard').then(r=>r.json()).then(data => { sample = data; init(); })
+   - Each card has a 'View all' link that points to dedicated pages: /courses/content, /schedule, /grades, /events
+   - To convert to React: make <Card title="..."> children </Card> and replace DOM rendering with props/state.
+   ------------------------- */
+</script>
+</body>
+</html>
